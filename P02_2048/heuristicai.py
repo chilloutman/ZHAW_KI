@@ -7,6 +7,7 @@ import sys
 # Description:			The logic of the AI to beat the game.
 
 UP, DOWN, LEFT, RIGHT = 0, 1, 2, 3
+moves = [UP, DOWN, LEFT, RIGHT]
 
 def find_best_move(board):
     bestmove = find_best_move_heuristic_agent(board)
@@ -14,46 +15,25 @@ def find_best_move(board):
     return bestmove
 
 def find_best_move_random_agent():
-    return random.choice([UP,DOWN,LEFT,RIGHT])
+    return random.choice(moves)
 
 def find_best_move_heuristic_agent(board):
-    moves = [UP, DOWN, LEFT, RIGHT]
     boards = [execute_move(move, board) for move in moves]
-    scores = [max(score_board(new_board)) if not board_equals(board, new_board) else 0 for new_board in boards]
-    best_score = max(scores)
-    return random.choice(moves) if best_score == 0 else moves[scores.index(best_score)]
+    scores = [find_max_score(board) for board in boards]
+    best_moves = [move for move, score in enumerate(scores) if score == max(scores)]
+    return random.choice(best_moves)
 
-def score_board(board, prioritize_high_tiles = False):
-    vertical_score = 0
-    horizontal_score = 0
+def find_max_score(board):
+    boards = [execute_move(move, board) for move in moves]
+    scores = [score_board(new_board) if not board_equals(board, new_board) else 0 for new_board in boards]
+    return max(scores)
 
-    vertical_searchee = 0
-    horizontal_searchee = 0
-
-    for y in range(0, 3):
-        for x in range(0, 3):
-            horizontal_n = board[y][x]
-            if 0 == horizontal_n:
-                continue
-            elif horizontal_searchee == horizontal_n:
-                horizontal_score += 1
-                horizontal_searchee = horizontal_n if prioritize_high_tiles else 1
-            else:
-                horizontal_searchee = horizontal_n
-
-            vertical_n = board[x][y]
-            if 0 == vertical_n:
-                continue
-            elif vertical_searchee == vertical_n:
-                vertical_score += 1
-                vertical_searchee = horizontal_n if prioritize_high_tiles else 1
-            else:
-                vertical_searchee = vertical_n
-
-        horizontal_searchee = 0
-        vertical_searchee = 0
-
-    return horizontal_score, vertical_score
+def score_board(board):
+    """
+    A board with more empty (0) tiles is defined as having a higher score.
+    Try to stay in the game for as long as possible.
+    """
+    return [tile for row in board for tile in row].count(0)
 
 def execute_move(move, board):
     """
