@@ -23,7 +23,7 @@ def find_best_move_heuristic_agent(board):
     best_score = max(scores)
     return random.choice(moves) if best_score == 0 else moves[scores.index(best_score)]
 
-def score_board(board):
+def score_board(board, prioritize_high_tiles = False):
     vertical_score = 0
     horizontal_score = 0
 
@@ -37,7 +37,7 @@ def score_board(board):
                 continue
             elif horizontal_searchee == horizontal_n:
                 horizontal_score += 1
-                horizontal_searchee = 0
+                horizontal_searchee = horizontal_n if prioritize_high_tiles else 1
             else:
                 horizontal_searchee = horizontal_n
 
@@ -46,7 +46,7 @@ def score_board(board):
                 continue
             elif vertical_searchee == vertical_n:
                 vertical_score += 1
-                vertical_searchee = 0
+                vertical_searchee = horizontal_n if prioritize_high_tiles else 1
             else:
                 vertical_searchee = vertical_n
 
