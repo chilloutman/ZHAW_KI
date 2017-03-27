@@ -66,15 +66,14 @@ def score_move(states, move):
     return new_new_states, score
 
 
-def score_speculative_insertions(gameState, value, probability):
+def score_speculative_insertions(game_state, value, probability):
     """
-    :type gameState: GameState
+    :type game_state: GameState
     :type value: int
     :type probability: float
     :rtype: list[GameState]
     """
-    new_states = [GameState(board, probability)
-                  for board in speculative_insertions(gameState.board, value)]
+    new_states = [GameState(board, probability) for board in speculative_insertions(game_state.board, value)]
     return new_states
 
 
