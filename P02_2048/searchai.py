@@ -2,7 +2,7 @@ import copy
 import random
 import game
 import sys
-from joblib import Parallel, delayed
+from multiprocessing import Pool
 from numpy import ndarray
 
 # Author:      chrn (original by nneonneo)
@@ -12,7 +12,6 @@ from numpy import ndarray
 
 UP, DOWN, LEFT, RIGHT = 0, 1, 2, 3
 moves = [UP, DOWN, LEFT, RIGHT]
-
 
 def find_best_move(board):
     """
@@ -31,15 +30,19 @@ def move_scores(board, depth=2):
 
     states = [[] if board_equals(board, execute_move(move, board)) else [GameState(board, 1)] for move in moves]
     scores = [0, 0, 0, 0]
-    # with Parallel(n_jobs=len(moves)) as parallel:
-    for d in range(depth):
-        # results = parallel(delayed(score_move)(states[move], move) for move in moves)
 
-        results = [score_move(states[move], move) for move in moves]
+    pool = Pool(4)
+    for d in range(depth):
+        results = pool.map(score_move_tuple, [(states[move], move) for move in moves])
+        # results =  parallel(delayed(score_move)(states[move], move) for move in moves)
+        # results = [score_move(states[move], move) for move in moves]
 
         states, scores = zip(*results)
         assert len(states) == 4
         assert len(scores) == 4
+
+    pool.close()
+    pool.join()
 
     # TODO:
     # Implement the Expectimax Algorithm.
@@ -49,6 +52,10 @@ def move_scores(board, depth=2):
     # 3.) When you reach the leaf calculate the board score with your heuristic.
 
     return scores
+
+
+def score_move_tuple(t):
+    return score_move(*t)
 
 
 def score_move(states, move):
@@ -61,7 +68,10 @@ def score_move(states, move):
     inserted_2 = sum([score_speculative_insertions(state, value=2, probability=state.probability * 0.9) for state in new_states], [])
     inserted_4 = sum([score_speculative_insertions(state, value=4, probability=state.probability * 0.1) for state in new_states], [])
     new_new_states = inserted_2 + inserted_4
-    score = sum([state.score() * state.probability for state in new_new_states])
+    if len(new_new_states) > 0:
+        score = sum([state.score() * state.probability for state in new_new_states]) / len(new_new_states)
+    else:
+        score = 0
 
     return new_new_states, score
 
@@ -112,8 +122,6 @@ def execute_move(move, board):
     move and return the grid without a new random tile 
     It won't affect the state of the game in the browser.
     """
-
-    UP, DOWN, LEFT, RIGHT = 0, 1, 2, 3
 
     if move == UP:
         return game.merge_up(board)
