@@ -12,19 +12,20 @@ https://www.sudoku.ws/hard-1.htm as an example.
 import sys
 sys.path.append("./python-constraint-1.2")
 import constraint as csp
+from constraint import *
 
 # ------------------------------------------------------------------------------
 # sudoku to solve (add "0" where no number is given)
 # ------------------------------------------------------------------------------
 riddle = [[0,0,0,2,0,0,0,6,3],
-             [3,0,0,0,0,5,4,0,1],
-             [0,0,1,0,0,3,9,8,0],
-             [0,0,0,0,0,0,0,9,0],
-             [0,0,0,5,3,8,0,0,0],
-             [0,3,0,0,0,0,0,0,0],
-             [0,2,6,3,0,0,5,0,0],
-             [5,0,3,7,0,0,0,0,8],
-             [4,7,0,0,0,1,0,0,0]]
+          [3,0,0,0,0,5,4,0,1],
+          [0,0,1,0,0,3,9,8,0],
+          [0,0,0,0,0,0,0,9,0],
+          [0,0,0,5,3,8,0,0,0],
+          [0,3,0,0,0,0,0,0,0],
+          [0,2,6,3,0,0,5,0,0],
+          [5,0,3,7,0,0,0,0,8],
+          [4,7,0,0,0,1,0,0,0]]
 
 # ------------------------------------------------------------------------------
 # create helpful lists of variable names
@@ -59,13 +60,22 @@ for x in range(3):  # over rows of boxes
 # ------------------------------------------------------------------------------
 # formulate sudoku as CSP
 # ------------------------------------------------------------------------------
+
 sudoku = csp.Problem()
 
+[sudoku.addVariable(rows[y][x], range(1,10))
+    if riddle[y][x] == 0
+    else sudoku.addVariable(rows[y][x], [riddle[y][x]])
+    for y in range(9) for x in range(9)]
 
+[sudoku.addConstraint(AllDifferentConstraint(), row) for row in rows]
+[sudoku.addConstraint(AllDifferentConstraint(), col) for col in cols]
+[sudoku.addConstraint(AllDifferentConstraint(), box) for box in boxes]
 
 # ------------------------------------------------------------------------------
 # solve CSP
 # ------------------------------------------------------------------------------
 solutions = sudoku.getSolutions()
+print(solutions)
 
 
