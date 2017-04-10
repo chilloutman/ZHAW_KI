@@ -14,38 +14,41 @@ texts = pa.read_csv('texts.csv', sep='\t', encoding='utf-8')
 suspect = 'Quandt Katarina'
 company_Board = ['Soltau Kristine', 'Eder Eva', 'Michael Jill']
 
-
-pyDatalog.create_terms('knows','has_link','many_more_needed')
+pyDatalog.create_terms('X', 'Y', 'Z')
+pyDatalog.create_terms('Knows','Has_link','Path')
 pyDatalog.clear()
 
 # First treat calls simply as social links (denoted knows), which have no date
-for i in range(0,50):
-    +knows(calls.iloc[i,1], calls.iloc[i,2])
+for i in range(0,33):
+    +Knows(calls.iloc[i,1], calls.iloc[i,2])
 
 
 
 # Knowing someone is a bi-directional relationship
-
+Knows(X,Y) <= Knows(Y,X)
 
 
 # Are there links between the company board and the suspect (i.e. does a path between the two exist)
 # has_link ha
 
-
-assert (has_link('Quandt Katarina', company_Board[0]))
-assert (has_link('Quandt Katarina', company_Board[1]))
-assert (has_link('Quandt Katarina', company_Board[2]))
+#assert (Has_link('Quandt Katarina', company_Board[0]))
+#assert (Has_link('Quandt Katarina', company_Board[1]))
+#assert (Has_link('Quandt Katarina', company_Board[2]))
 
 # find all paths between the board members and the suspect
 # Hints:
 # if a knows b, there is a path between a and b
-# (X._not_in(P2)) is used to check wether x is not in path P2
+# (X._not_in(P2)) is used to check whether x is not in path P2
 # (P==P2+[Z]) declares P as a new path containing P2 and Z
+#Direct
+Path(X,Y) <= Knows(X,Y)
+#Via Z
+Path(X,Y) <= Knows(X,Z) & Path(Z,Y)
 
 
+print(Path('Kretzer Julian', Y))
 
-
-# there are so many path, therefore we are only interested in short pahts.
+# there are so many path, therefore we are only interested in short paths.
 # find all the paths between the suspect and the company board, which contain five poeple or less
 
 
@@ -59,21 +62,21 @@ date_shares_bought = '23.2.2017'
 
 
 # add terms to datalog
-pyDatalog.create_terms('called,texted')
+pyDatalog.create_terms('Called,Texted')
 pyDatalog.clear()
 
 
 # calls
 for i in range(0,50):
-    +called(calls.iloc[i,1], calls.iloc[i,2],calls.iloc[i,3])
+    +Called(calls.iloc[i,1], calls.iloc[i,2],calls.iloc[i,3])
 
 # texts
 for i in range(0,50):
-    +texted(texts.iloc[i,1], texts.iloc[i,2],texts.iloc[i,3])
+    +Texted(texts.iloc[i,1], texts.iloc[i,2],texts.iloc[i,3])
 
 
 # calls are bi-directional
-called(X,Y,Z) <= called(Y,X,Z)
+Called(X,Y,Z) <= Called(Y,X,Z)
 
 
 
