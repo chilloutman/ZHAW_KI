@@ -14,7 +14,7 @@ texts = pa.read_csv('texts.csv', sep='\t', encoding='utf-8')
 suspect = 'Quandt Katarina'
 company_Board = ['Soltau Kristine', 'Eder Eva', 'Michael Jill']
 
-pyDatalog.create_terms('X', 'Y', 'Z', 'L')
+pyDatalog.create_terms('X', 'Y', 'Z', 'N', 'Count', 'L', 'P1', 'P2', 'P3')
 pyDatalog.create_terms('Knows','Has_link', 'Daves_link', 'Path', 'Paths')
 pyDatalog.clear()
 
@@ -50,14 +50,24 @@ assert(Daves_link())
 # find all the paths between the suspect and the company board, which contain five poeple or less
 
 Path(X, Y) <= Path(X, Y, 5)
-Path(X, Y, L) <= Knows(X, Y)
-Path(X, Y, L) <= (L > 0) & Knows(X, Z) & Path(Z, Y, L - 1)
+Path(X, Y, Count) <= Knows(X, Y)
+Path(X, Y, Count) <= (Count > 0) & Knows(X, Z) & Path(Z, Y, Count - 1)
 
 assert(Path(company_Board[2], 'Quandt Katarina'))
 assert(Path('Quandt Katarina', company_Board[1]))
 
-# Paths(X, Y) <= Paths(X, Y, [])
-# Paths(X, Y, L) <= L
+# Direct paths involving Quandt:
+# print(Path('Quandt Katarina', Y, 0))
+
+Paths(X, Y) <= Knows(X, Y)
+Paths(X, P1, Y) <= Knows(X, Y) & (P1 == '-')
+Paths(X, P1, Y) <= Paths(X, P1) & Paths(P1, Y) & P1._not_in(X + Y)
+Paths(X, P1, P2, Y) <= Knows(X, Y) & (P1 == '-') & (P2 == '-')
+Paths(X, P1, P2, Y) <= Paths(X, P1, P2) & Paths(P2, Y) & P1._not_in(X + Y) & P2._not_in(X + Y)
+Paths(X, P1, P2, P3, Y) <= Knows(X, Y) & (P1 == '-') & (P2 == '-') & (P3 == '-')
+Paths(X, P1, P2, P3, Y) <= Paths(X, P1, P2, P3) & Paths(P3, Y) & P1._not_in(X + Y) & P2._not_in(X + Y) & P3._not_in(X + Y)
+
+print(Paths('Quandt Katarina', P1, P2, P3, company_Board[1]))
 
 # Now we use the text and the calls data together their corresponding dates
 # Call-Data analysis
@@ -85,8 +95,8 @@ Called(X,Y,Z) <= Called(Y,X,Z)
 # we are are again interested in links, but this time a connection only valid the links are descending in date
 # find out who could have actually sent an information, when imposing this new restriction
 
-Linked(X) <= (X == ['asdf'])
-print(Linked([';lkj']))
+# Linked(X) <= (X == ['asdf'])
+# print(Linked([';lkj']))
 
 # at last find all the communication paths which lead to the suspect, again with the restriction that the dates have to be ordered correctly
 
