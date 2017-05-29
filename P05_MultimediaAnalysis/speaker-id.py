@@ -13,7 +13,7 @@ On a larger data set, the speaker identification performance could also be asses
 '''
 
 import os
-import sys 
+import sys
 import librosa
 import numpy as np
 from sklearn import mixture
@@ -34,15 +34,15 @@ def main():
     utterances = load_data(test_data)
     print "\nList of voice samples:"
     for sample in utterances:
-        print sample['name']
+        print sample['file']
     print
-    
+
     score = score_models(speakers, utterances)
     print "Overall accuracy of speaker identification: {a}%".format(a=score)
-    
+
 #
 # Commonly used methods to structure the code
-#  
+#
 def extract_features(signal, sample_rate):
     '''extract 13 MFCCs from the given signal with frame size = 512 samples, frame step = 256 samples'''
     frame_size = 512
@@ -56,16 +56,16 @@ def build_model(features):
     gmm = mixture.GaussianMixture(n_components=mixture_count, covariance_type='diag', n_init=1)
     gmm.fit(features)
     return gmm
-    
+
 def get_speaker_name(file_name):
     '''extract the speaker name from the file name, assuming that the name is the file name without the extension'''
-    dot_position = file_name.rfind('.')
+    dot_position = file_name.find('.')
     if dot_position > -1:
         return file_name[0:dot_position]
     else:
         return file_name #no dot
 
-#        
+#
 # Code to load utterances from files
 #
 def load_data(path, build_models=True):
@@ -78,12 +78,12 @@ def load_data(path, build_models=True):
             gmm = None
             if build_models:
                 gmm = build_model(mfccs)
-            speaker = {'name':get_speaker_name(wav_file), 'mfccs':mfccs, 'gmm':gmm}
+            speaker = {'file': wav_file, 'name':get_speaker_name(wav_file), 'mfccs':mfccs, 'gmm':gmm}
             speakers.append(speaker)
     return speakers
- 
-#    
-# Score the test samples against the pre-build speaker models    
+
+#
+# Score the test samples against the pre-build speaker models
 #
 def score_models(speakers, utterances):
     small_number = -sys.float_info.max
@@ -102,6 +102,6 @@ def score_models(speakers, utterances):
     return 100*(float(correct)/float(len(utterances)))
 
 
-# start the script if executed directly    
+# start the script if executed directly
 if __name__ == '__main__':
     main()
