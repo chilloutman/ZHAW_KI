@@ -27,18 +27,19 @@ def main():
     test_data = "./test"
 
     speakers = load_data(training_data)
-    print "List of known speakers:"
+    print("List of known speakers:")
     for speaker in speakers:
-        print speaker['name']
+        print(speaker['name'])
 
     utterances = load_data(test_data)
-    print "\nList of voice samples:"
+    print("\nList of voice samples:")
     for sample in utterances:
-        print sample['file']
+        print(sample['file'])
     print
 
-    score = score_models(speakers, utterances)
-    print "Overall accuracy of speaker identification: {a}%".format(a=score)
+    score, recall = score_models(speakers, utterances)
+    print("Overall accuracy of speaker identification: {a}%".format(a=score))
+    print("Recall of speaker identification: {0}".format(recall))
 
 #
 # Commonly used methods to structure the code
@@ -98,8 +99,11 @@ def score_models(speakers, utterances):
                 best_match = speaker
         if best_match['name'] == sample['name']:
             correct += 1
-        print "Utterance '{q}' has been identified as speaker '{d}'".format(q=sample['name'], d=best_match['name'])
-    return 100*(float(correct)/float(len(utterances)))
+        print("Utterance '{q}' has been identified as speaker '{d}'".format(q=sample['name'], d=best_match['name']))
+        score = 100*(float(correct)/float(len(utterances)))
+        recall = score/100
+
+    return score, recall
 
 
 # start the script if executed directly
